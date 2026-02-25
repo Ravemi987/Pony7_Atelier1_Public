@@ -1,0 +1,126 @@
+fun valueIterationPolicy (states, actions, Proba, Reward, gamma, epsilon) {
+  V[nb_states] <- [0]; 
+  policy[nb_states] <- [0]; 
+  delta <- +Inf
+ 
+  while (delta > epsilon) {
+    delta <- 0
+    V_new <- V
+    
+    for (s in states) {
+      Q_values[nb_states] = [0]
+      
+      for (a in actions) {
+        Q_values[a] <- Reward[s][a] + gamma * sum(Proba[s][a] * V)
+      }
+      
+      best_action <- argmax(Q_values)
+      V_new[s] <- Q_values[best_action]
+      policy[s] <- actions[best_action]
+      
+      delta <- max(delta, abs(V_new[s] - V[s]))
+    }
+    
+    V <- V_new
+  
+  }
+  
+  return (V, policy)
+}
+
+
+--------------------------------------------
+
+
+fun policyEvaluation (policy, V, states, actions, Proba, Reward, gamma, epsilon) {
+  delta <- +Inf
+
+  while (delta > epsilon) {
+    delta <- 0
+    V_new <- V
+    
+    for (s in states) {
+      a <- arg(policy[s] == actions)
+      V_new[s] <- Reward[s][a] + gamma * sum(Proba[s][a] * V)
+      delta <- max(delta, abs(V_new[s] - V[s]))
+    }
+
+    V <- V_new
+  }
+  
+  return V
+}
+
+
+fun policyImprovement (policy, V, states, actions, Proba, Reward, gamma) {
+  policy_stable <- TRUE
+  
+  for (s in states) {
+    Q_values[nb_actions] = [0]
+    
+    for (a in actions) {
+      Q_values[a] <- Reward[s][a] + gamma * sum(Proba[s][a] * V)
+    }
+    
+    best_action <- arg.max(Q_values)
+
+    if (policy[s] != actions[best_action]) {
+      policy_stable <- FALSE
+    }
+    
+    policy[s] <- actions[best_action]
+  }
+  
+  return (policy, policy_stable)
+}
+
+
+fun policyIterationGreedy (states, actions, Proba, Reward, gamma, epsilon) {
+  V[nb_states] <- [0]
+
+  policy[nb_states] <- random(actions)
+  policy_stable <- FALSE
+
+  while(!policy_stable) {
+    V <- policyEvaluation(policy, V, states, actions, Proba, Reward)
+    new_policy <- policyImprovement(policy, V, states, actions, Proba, Reward)
+    
+    policy <- new_policy.policy
+    policy_stable <- new_policy.is_stable
+
+  }
+
+  return (V, policy)
+}
+
+
+--------------------------------------------
+
+
+fun QLearning (states, actions, TransFun, RewardFun, max_epochs, 
+                      max_step, gamma, alpha, epsilon) {
+  
+  Q[nb_states][nb_actions] = [[0]]
+  initial_state = states[0]
+  
+  for (epoch in 1:max_epochs) {
+    state <- initial_state
+    
+    for (step in 1:max_step) {
+      
+      if (runif(1) < epsilon) {
+        action <- sample(1:length(actions), 1)
+      } else {
+        action <- which.max(Q[state, ])
+      }
+      
+      new_state <- TransFun(state, action)
+      reward <- RewardFun(state, action)
+      
+      Q[state, action] <- Q[state, action] + alpha * (reward + gamma * max(Q[new_state, ]) - Q[state, action])
+      
+      state <- new_state
+    }
+  }
+  return Q
+}
