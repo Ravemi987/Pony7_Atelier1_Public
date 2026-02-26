@@ -109,9 +109,9 @@ fun QLearning (states, actions, TransFun, RewardFun, max_epochs,
     for (step in 1:max_step) {
       
       if (runif(1) < epsilon) {
-        action <- sample(1:length(actions), 1)
+        action <- random(actions)
       } else {
-        action <- which.max(Q[state, ])
+        action <- argmax(Q[state, ])
       }
       
       new_state <- TransFun(state, action)
