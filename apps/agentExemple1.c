@@ -63,8 +63,8 @@ int main(void) {
 
     /* --- Q-Learning --- */
 
-    QLearning(m);
-    RLModelPrintQTable(m);
+    valueIteration(m);
+    RLModelPrintStatesValues(m);
     RLModelPrintPolicy(m);
 
     /* -------- Création et Exécution de l'Agent -------- */
